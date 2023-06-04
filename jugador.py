@@ -1,0 +1,25 @@
+from grsim_ros_bridge_msgs.msg import SSL  # Importamos el mensaje SSL para la comunicación con grSim
+
+class Jugador:
+    def __init__(self, posicion):
+        self.posicion = posicion #En que posicion juega
+        self.ubicacion = {'x':0,'y':0} #lista donde se guardan los parametros de laubicación del jugador
+        #self.ubicacion_y = 0
+        self.orientacion = 0 #Angulo de orientacion
+
+    def get_ubicacion(self):
+        return self.ubicacion
+
+ #   def get_ubicacion_y(self):
+  #      return self.ubicacion_y     
+
+    def set_ubicacion(self,x,y):
+        self.ubicacion['x'] = x
+        self.ubicacion['y'] = y
+
+    def set_orientacion(self,valor):
+        self.orientacion = valor
+
+    def get_orientacion(self):
+        return self.orientacion        
+        
