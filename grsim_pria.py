@@ -9,12 +9,12 @@ from jugador import Jugador
 from pelota import Pelota
 
 ball = SSL_DetectionBall()  # Creamos una instancia del mensaje SSL_DetectionBall
-pelota = Pelota()
-golero = Jugador('atacante1')
-defensa1= Jugador('atacante1')
-defensa2 = Jugador('atacante1')
+#pelota = Pelota()
+golero = Jugador('golero')
+defensa1= Jugador('defensa1')
+defensa2 = Jugador('defensa2')
 atacante1 = Jugador('atacante1')
-atacante2 = Jugador('atacante1')
+atacante2 = Jugador('atacante2')
 
 def vision_callback(data):
     global ball, golero, defensa1, defensa2, atacante1, atacante2
@@ -22,19 +22,19 @@ def vision_callback(data):
     if len(data.robots_blue) > 0:
         for robot in data.robots_blue:
             if robot.robot_id == 0:
-                golero.set_ubicacion(robot.pixel_x, robot.pixel_y)  # Actualizamos la información del robot 3
+                golero.set_ubicacion(robot.pixel_x, robot.pixel_y)  # Actualizamos la información del robot 0
                 golero.set_orientacion(robot.orientation)
             if robot.robot_id == 1:
-                defensa1.set_ubicacion(robot.pixel_x, robot.pixel_y)  # Actualizamos la información del robot 3
+                defensa1.set_ubicacion(robot.pixel_x, robot.pixel_y)  # Actualizamos la información del robot 1
                 defensa1.set_orientacion(robot.orientation)
             if robot.robot_id == 2:
-                defensa2.set_ubicacion(robot.pixel_x, robot.pixel_y)  # Actualizamos la información del robot 3
+                defensa2.set_ubicacion(robot.pixel_x, robot.pixel_y)  # Actualizamos la información del robot 2
                 defensa2.set_orientacion(robot.orientation)
             if robot.robot_id == 3:
                 atacante1.set_ubicacion(robot.pixel_x, robot.pixel_y)  # Actualizamos la información del robot 3
                 atacante1.set_orientacion(robot.orientation)
             if robot.robot_id == 4:
-                atacante2.set_ubicacion(robot.pixel_x, robot.pixel_y)  # Actualizamos la información del robot 3
+                atacante2.set_ubicacion(robot.pixel_x, robot.pixel_y)  # Actualizamos la información del robot 4
                 atacante2.set_orientacion(robot.orientation)
         ball = data.balls  # Actualizamos la información del balón
         print('ball  ', ball)
@@ -42,45 +42,121 @@ def vision_callback(data):
 if __name__ == "__main__":
     rospy.init_node("grsim_pria", anonymous=False)  # Inicializamos el nodo ROS con el nombre "grsim_pria"
     rospy.Subscriber("/vision", SSL_DetectionFrame, vision_callback)  # Nos suscribimos al tópico "/vision" para recibir los marcos de detección
-    atacante1.publisher= rospy.Publisher("/robot_blue_3/cmd", SSL, queue_size=10)  # Creamos un publicador para enviar comandos al robot 0 azul
+    golero.publisher= rospy.Publisher("/robot_blue_0/cmd", SSL, queue_size=10)  # Creamos un publicador para enviar comandos al robot 0 azul
     r = rospy.Rate(1000)  # Establecemos la frecuencia de publicación en 1000 Hz
 
-    atacante1_x = 0  # Inicializamos la posición x del robot 0 en 0
-    atacante1_y = 0  # Inicializamos la posición y del robot 0 en 0
+    golero_x = 0  # Inicializamos la posición x del robot 0 en 0
+    golero_y = 0  # Inicializamos la posición y del robot 0 en 0
     ball_x = 0  # Inicializamos la posición x del balón en 0
     ball_y = 0  # Inicializamos la posición y del balón en 0
 
-    msg = SSL()  # Creamos una instancia del mensaje SSL para enviar comandos al robot
+    golero_msg = SSL()  # Creamos una instancia del mensaje SSL para enviar comandos al robot
 
     while not rospy.is_shutdown():
         try:
             ball_x = ball[0].x  # Obtenemos la posición x del balón #pelota.get_ubicacion()['x'] 
             ball_y = ball[0].y  # Obtenemos la posición y del balón #pelota.get_ubicacion()['y'] 
-            atacante1_x = atacante1.get_ubicacion()['x'] # Obtenemos la posición x del robot 0
-            atacante1_y = atacante1.get_ubicacion()['y']  # Obtenemos la posición y del robot 0
+            golero_x = golero.get_ubicacion()['x'] # Obtenemos la posición x del robot 0
+            golero_y = golero.get_ubicacion()['y']  # Obtenemos la posición y del robot 0
         except:
             pass
 
-        goal_angle = math.atan2(ball_y - atacante1_y, ball_x - atacante1_x)  # Calculamos el ángulo hacia el objetivo
+        ######################################################################################
+#Golero
 
-        heading = abs(goal_angle - atacante1.get_orientacion())  # Calculamos la diferencia angular entre el objetivo y la orientación del robot
+        #Calculamos la posicion de la pelota respeto al jugador
+        # Primero la distancia de la pelota al jugador, ESTIMAMOS El CUADRADO DE LA DISTANCIA   
+        distance_ball_cua= ((ball_x - golero_x)**2 + (ball_y - golero_y )**2)
+        
+        
+        if ball_x > -800 and distance_ball_cua> 2500:
+            # Si la pelota esta lejos del golero y del arco el golero va a su posicion inicial
+            pos_x = -1500
+            pos_y = 0
+            dis_cerca=100
+            distance_pos = (pos_x - golero_x)**2 +( pos_y - golero_y )**2
+            
+            if distance_pos< dis_cerca:
+                # Si el golero está cerca de su posición objetivo, detenerse
+                golero_msg.cmd_vel.linear.x = 0
+                golero_msg.cmd_vel.angular.z = 0
+                 
 
-        distance = math.sqrt((ball_x - atacante1_x)**2 + (ball_y - atacante1_y)**2)  # Calculamos la distancia al objetivo
-
-        if distance < 0.2:  # Si la distancia al objetivo es menor a 0.2
-            msg.cmd_vel.linear.x = 0  # Detenemos el movimiento lineal
-            msg.cmd_vel.angular.z = 0  # Detenemos el movimiento angular
-        else:
-            if heading < 0.2:  # Si la diferencia angular es menor a 0.2
-                msg.cmd_vel.linear.x = 0.25  # Movemos hacia adelante con una velocidad lineal de 0.25
-                msg.cmd_vel.angular.z = 0  # No hay movimiento angular
             else:
-                msg.cmd_vel.linear.x = 0  # No hay movimiento lineal
-                msg.cmd_vel.angular.z = 0.5  # Rotamos con una velocidad angular de 0.5
+                # Si el golero no está en su posición objetivo, moverse hacia allá
+                goal_angle = math.atan2(pos_y- golero_y , pos_x- golero_x)
+                heading_pos = goal_angle - golero.get_orientacion()
+                heading_pos= math.atan2(math.sin(heading_pos), math.cos(heading_pos))
+
+                if abs(heading_pos)<0.2:
+                   # si la idea de la programacion es la misma, controlar con otro rango la velocidad de los jugadores
+                   golero_msg.cmd_vel.linear.x = (distance_pos /2000000)+ 1#1.5
+                   golero_msg.cmd_vel.angular.z = 0
+                else:
+                    golero_msg.cmd_vel.linear.x = 0
+                    golero_msg.cmd_vel.angular.z = heading_pos*5+1 if heading_pos > 0 else heading_pos*5-1 #1.9 if heading_pos > 0 else -1.9
+
+        else:
+
+            # Si la pelota esta cerca del golero o se acerca al arco seguir la pelota
+            if distance_ball_cua< 0.2:
+                # Si esta cerca detenerse
+                golero_msg.cmd_vel.linear.x = 0
+                golero_msg.cmd_vel.angular.z = 0
+                
+                # programar pase
+                golero_msg.dribbler =False
+                golero_msg.kicker = 3
+
+            else:
+
+                goal_angle = math.atan2(ball_y - golero_y , ball_x - golero_x)
+                heading_ball = goal_angle - golero.get_orientacion()
+                heading_ball = math.atan2(math.sin(heading_ball), math.cos(heading_ball))
+        
+                if abs(heading_ball) < 0.2:
+                    # Si la orientación es correcta, avanzar hacia la pelota
+                    golero_msg.cmd_vel.linear.x = (distance_ball_cua/4000000)+ 1#calculo de velocidad segun la distancia
+                    golero_msg.cmd_vel.angular.z = 0
+                else:
+
+                    # Si la orientación no es correcta, girar
+                    golero_msg.cmd_vel.linear.x = 0
+                    golero_msg.cmd_vel.angular.z = heading_ball*5+1 if heading_ball > 0 else heading_ball*5-1 
+                                                                #control para que gire mas optimo
+
+
+
+
+
+
+
+
+
+
+
+        # goal_angle = math.atan2(ball_y - atacante1_y, ball_x - atacante1_x)  # Calculamos el ángulo hacia el objetivo
+
+        # heading = abs(goal_angle - atacante1.get_orientacion())  # Calculamos la diferencia angular entre el objetivo y la orientación del robot
+
+        # distance = math.sqrt((ball_x - atacante1_x)**2 + (ball_y - atacante1_y)**2)  # Calculamos la distancia al objetivo
+
+        # if distance < 0.2:  # Si la distancia al objetivo es menor a 0.2
+        #     msg.cmd_vel.linear.x = 0  # Detenemos el movimiento lineal
+        #     msg.cmd_vel.angular.z = 0  # Detenemos el movimiento angular
+        # else:
+        #     if heading < 0.2:  # Si la diferencia angular es menor a 0.2
+        #         msg.cmd_vel.linear.x = 0.25  # Movemos hacia adelante con una velocidad lineal de 0.25
+        #         msg.cmd_vel.angular.z = 0  # No hay movimiento angular
+        #     else:
+        #         msg.cmd_vel.linear.x = 0  # No hay movimiento lineal
+        #         msg.cmd_vel.angular.z = 0.5  # Rotamos con una velocidad angular de 0.5
 
         #msg.dribbler = True  # Activamos el dribbler
-        msg.kicker = 1.0 # Activamos el kicker
+        golero_msg.kicker = 1.0 # Activamos el kicker
 
         #print(heading, distance)  # Imprimimos la diferencia angular y la distancia
 
-        atacante1.publisher.publish(msg)  # Publicamos el mensaje de comandos para el robot 0 azul
+        golero.publisher.publish(golero_msg)  # Publicamos el mensaje de comandos para el robot 0 azul
+
+        #r.sleep()

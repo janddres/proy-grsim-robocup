@@ -9,10 +9,7 @@ class Jugador:
         self.publisher = None
 
     def get_ubicacion(self):
-        return self.ubicacion
-
- #   def get_ubicacion_y(self):
-  #      return self.ubicacion_y     
+        return self.ubicacion  
 
     def set_ubicacion(self,x,y):
         self.ubicacion['x'] = x
