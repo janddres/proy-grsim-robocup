@@ -1,24 +1,25 @@
 #! /usr/bin/env python3
 
-#! /usr/bin/env python3
-
 import rospy  # Importamos el módulo rospy para interactuar con ROS
 from geometry_msgs.msg import Twist  # Importamos el mensaje Twist para el control de movimiento
 from grsim_ros_bridge_msgs.msg import SSL  # Importamos el mensaje SSL para la comunicación con grSim
 from krssg_ssl_msgs.msg import SSL_DetectionFrame, SSL_DetectionBall  # Importamos los mensajes relacionados con la detección de robots y balón
 import math  # Importamos el módulo math para realizar operaciones matemáticas
 from jugador import Jugador
+from pelota import Pelota
 
 ball = SSL_DetectionBall()  # Creamos una instancia del mensaje SSL_DetectionBall
+#pelota = Pelota()
 golero = Jugador('golero')
 defensa1= Jugador('defensa1')
 defensa2 = Jugador('defensa2')
 atacante1 = Jugador('atacante1')
 atacante2 = Jugador('atacante2')
-#comentario
 
 def vision_callback(data):
     global ball, golero, defensa1, defensa2, atacante1, atacante2
+    ball = data.balls  # Actualizamos la información del balón
+    print('ball  ', ball)
     # Recorremos la lista de robots azules detectados en el marco de detección
     if len(data.robots_blue) > 0:
         for robot in data.robots_blue:
@@ -37,8 +38,6 @@ def vision_callback(data):
             if robot.robot_id == 4:
                 atacante2.set_ubicacion(robot.pixel_x, robot.pixel_y)  # Actualizamos la información del robot 4
                 atacante2.set_orientacion(robot.orientation)
-    ball = data.balls  # Actualizamos la información del balón
-    print('ball  ', ball)
         #pelota.set_ubicacion(data.balls[0].x, data.balls[0].y)
 if __name__ == "__main__":
     rospy.init_node("grsim_pria", anonymous=False)  # Inicializamos el nodo ROS con el nombre "grsim_pria"
@@ -80,24 +79,33 @@ if __name__ == "__main__":
             distance_pos = (pos_x - golero_x)**2 +( pos_y - golero_y )**2
            
             if distance_pos< dis_cerca:
-                # Si el golero está cerca de su posición objetivo, detenerse
-                golero_msg.cmd_vel.linear.x = 0
-                golero_msg.cmd_vel.angular.z = 0
-                 
-
+                golero_msg = golero.mirar_frente(golero_msg)
+                # golero_msg.cmd_vel.linear.x = 0
+               
+                # goal_angle = math.atan2(posfrente_y- golero_y , posfrente_x- golero_x)
+                # heading_posfrente = goal_angle - golero.get_orientacion()
+                # heading_posfrente= math.atan2(math.sin(heading_posfrente), math.cos(heading_posfrente))
+                # #gira hasta mirar al frente
+                # if abs(heading_posfrente)<0.2:
+                #     golero_msg.cmd_vel.angular.z = 0
+                # else:
+                #     golero_msg.cmd_vel.linear.x = 0
+                #     golero_msg.cmd_vel.angular.z = heading_posfrente*5+0.5 if heading_posfrente > 0 else heading_posfrente*5-0.5
+                                    
             else:
-                # Si el golero no está en su posición objetivo, moverse hacia allá
-                goal_angle = math.atan2(pos_y- golero_y , pos_x- golero_x)
-                heading_pos = goal_angle - golero.get_orientacion()
-                heading_pos= math.atan2(math.sin(heading_pos), math.cos(heading_pos))
+                golero_msg = golero.ir_a_posicion(distance_pos,golero_msg)
+                # # Si el golero no está en su posición objetivo, moverse hacia allá
+                # goal_angle = math.atan2(pos_y- golero_y , pos_x- golero_x)
+                # heading_pos = goal_angle - golero.get_orientacion()
+                # heading_pos= math.atan2(math.sin(heading_pos), math.cos(heading_pos))
 
-                if abs(heading_pos)<0.2:
-                   # si la idea de la programacion es la misma, controlar con otro rango la velocidad de los jugadores
-                   golero_msg.cmd_vel.linear.x = (distance_pos /2000000)+ 0.5#1.5
-                   golero_msg.cmd_vel.angular.z = 0
-                else:
-                    golero_msg.cmd_vel.linear.x = 0
-                    golero_msg.cmd_vel.angular.z = heading_pos*5+1 if heading_pos > 0 else heading_pos*5-1 #1.9 if heading_pos > 0 else -1.9
+                # if abs(heading_pos)<0.2:
+                #    # si la idea de la programacion es la misma, controlar con otro rango la velocidad de los jugadores
+                #    golero_msg.cmd_vel.linear.x = (distance_pos /2000000)+ 0.5#1.5
+                #    golero_msg.cmd_vel.angular.z = 0
+                # else:
+                #     golero_msg.cmd_vel.linear.x = 0
+                #     golero_msg.cmd_vel.angular.z = heading_pos*5+0.5 if heading_pos > 0 else heading_pos*5-0.5
 
         else:
 
@@ -125,7 +133,7 @@ if __name__ == "__main__":
 
                     # Si la orientación no es correcta, girar
                     golero_msg.cmd_vel.linear.x = 0
-                    golero_msg.cmd_vel.angular.z = heading_ball*5+1 if heading_ball > 0 else heading_ball*5-1 
+                    golero_msg.cmd_vel.angular.z = heading_ball*5+0.5 if heading_ball > 0 else heading_ball*5-0.5
                                                                 #control para que gire mas optimo
 
 
@@ -136,4 +144,4 @@ if __name__ == "__main__":
 
         golero.publisher.publish(golero_msg)  # Publicamos el mensaje de comandos para el robot 0 azul
 
-        #r.sleep()
+        r.sleep()

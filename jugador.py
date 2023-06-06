@@ -1,3 +1,4 @@
+from geometry_msgs.msg import Twist  # Importamos el mensaje Twist para el control de movimiento
 from grsim_ros_bridge_msgs.msg import SSL  # Importamos el mensaje SSL para la comunicación con grSim
 import math  # Importamos el módulo math para realizar operaciones matemáticas
 
@@ -8,7 +9,7 @@ class Jugador:
         #self.ubicacion_y = 0
         self.orientacion = 0 #Angulo de orientacion
         self.publisher = None
-        self.msg = SSL
+        self.msg = SSL()
 
     def get_ubicacion(self):
         return self.ubicacion  
@@ -27,5 +28,37 @@ class Jugador:
         self.publisher = valor
 
     def get_publiser(self):
-        return self.publisher          
+        return self.publisher
+    
+
+    def mirar_frente(self, msg):
+        self.msg = msg
+        self.msg.cmd_vel.linear.x = 0    
+        #goal_angle = math.atan2(posfrente_y- golero_y , posfrente_x- golero_x)
+        goal_angle = math.atan2(0 - self.ubicacion['y'], 2000 - self.ubicacion['x'])
+        heading_posfrente = goal_angle - self.orientacion
+        heading_posfrente= math.atan2(math.sin(heading_posfrente), math.cos(heading_posfrente))
+        #gira hasta mirar al frente
+        if abs(heading_posfrente)<0.2:
+            self.msg.cmd_vel.angular.z = 0
+        else:
+            self.msg.cmd_vel.linear.x = 0
+            self.msg.cmd_vel.angular.z = heading_posfrente*5+0.5 if heading_posfrente > 0 else heading_posfrente*5-0.5 
         
+        return(self.msg)
+    
+    def ir_a_posicion(self,distance_pos,msg):
+        # Si el jugador no está en su posición objetivo, moverse hacia allá
+        goal_angle = math.atan2(0- self.ubicacion['y'], -1500 - self.ubicacion['x'])
+        heading_pos = goal_angle - self.get_orientacion()
+        heading_pos= math.atan2(math.sin(heading_pos), math.cos(heading_pos))
+
+        if abs(heading_pos)<0.2:
+            # si la idea de la programacion es la misma, controlar con otro rango la velocidad de los jugadores
+            self.msg.cmd_vel.linear.x = (distance_pos /2000000)+ 0.5#1.5
+            self.msg.cmd_vel.angular.z = 0
+        else:
+            self.msg.cmd_vel.linear.x = 0
+            self.msg.cmd_vel.angular.z = heading_pos*5+0.5 if heading_pos > 0 else heading_pos*5-0.5
+
+        return(self.msg)    
