@@ -1,4 +1,5 @@
 from grsim_ros_bridge_msgs.msg import SSL  # Importamos el mensaje SSL para la comunicación con grSim
+import math  # Importamos el módulo math para realizar operaciones matemáticas
 
 class Jugador:
     def __init__(self, posicion):
@@ -7,6 +8,7 @@ class Jugador:
         #self.ubicacion_y = 0
         self.orientacion = 0 #Angulo de orientacion
         self.publisher = None
+        self.msg = SSL
 
     def get_ubicacion(self):
         return self.ubicacion  
