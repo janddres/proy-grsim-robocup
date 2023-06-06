@@ -79,19 +79,9 @@ if __name__ == "__main__":
             distance_pos = (pos_x - golero_x)**2 +( pos_y - golero_y )**2
            
             if distance_pos< dis_cerca:
-           
+                # Si el golero está cerca de su posición objetivo, detenerse
                 golero_msg.cmd_vel.linear.x = 0
-               
-                goal_angle = math.atan2(posfrente_y- golero_y , posfrente_x- golero_x)
-                heading_posfrente = goal_angle - golero.get_orientacion()
-                heading_posfrente= math.atan2(math.sin(heading_posfrente), math.cos(heading_posfrente))
-                #gira hasta mirar al frente
-                if abs(heading_posfrente)<0.2:
-                    golero_msg.cmd_vel.angular.z = 0
-                else:
-                    golero_msg.cmd_vel.linear.x = 0
-                    golero_msg.cmd_vel.angular.z = heading_posfrente*5+0.5 if heading_posfrente > 0 else heading_posfrente*5-0.5
-                   
+                golero_msg.cmd_vel.angular.z = 0
                  
 
             else:
@@ -106,7 +96,7 @@ if __name__ == "__main__":
                    golero_msg.cmd_vel.angular.z = 0
                 else:
                     golero_msg.cmd_vel.linear.x = 0
-                    golero_msg.cmd_vel.angular.z = heading_pos*5+0.5 if heading_pos > 0 else heading_pos*5-0.5
+                    golero_msg.cmd_vel.angular.z = heading_pos*5+1 if heading_pos > 0 else heading_pos*5-1 #1.9 if heading_pos > 0 else -1.9
 
         else:
 
@@ -134,7 +124,7 @@ if __name__ == "__main__":
 
                     # Si la orientación no es correcta, girar
                     golero_msg.cmd_vel.linear.x = 0
-                    golero_msg.cmd_vel.angular.z = heading_ball*5+0.5 if heading_ball > 0 else heading_ball*5-0.5
+                    golero_msg.cmd_vel.angular.z = heading_ball*5+1 if heading_ball > 0 else heading_ball*5-1 
                                                                 #control para que gire mas optimo
 
 
@@ -145,4 +135,4 @@ if __name__ == "__main__":
 
         golero.publisher.publish(golero_msg)  # Publicamos el mensaje de comandos para el robot 0 azul
 
-        r.sleep()
+        #r.sleep()
