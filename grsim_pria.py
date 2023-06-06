@@ -15,6 +15,7 @@ defensa1= Jugador('defensa1')
 defensa2 = Jugador('defensa2')
 atacante1 = Jugador('atacante1')
 atacante2 = Jugador('atacante2')
+#comentario
 
 def vision_callback(data):
     global ball, golero, defensa1, defensa2, atacante1, atacante2
