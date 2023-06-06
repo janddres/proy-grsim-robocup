@@ -71,12 +71,14 @@ if __name__ == "__main__":
        
         if ball_x > -800 and distance_ball_cua> 2500:
             # Si la pelota esta lejos del golero y del arco el golero va a su posicion inicial
-            pos_x = -1500
-            pos_y = 0
-            posfrente_x=2000
-            posfrente_y=0
+            # pos_x = -1500
+            # pos_y = 0
+            # posfrente_x=2000
+            # posfrente_y=0
             dis_cerca=10000
-            distance_pos = (pos_x - golero_x)**2 +( pos_y - golero_y )**2
+
+            #distance_pos = (pos_x - golero_x)**2 +( pos_y - golero_y )**2
+            distance_pos = golero.set_posicion_distan()
            
             if distance_pos< dis_cerca:
                 golero_msg = golero.mirar_frente(golero_msg)
@@ -116,6 +118,7 @@ if __name__ == "__main__":
                 golero_msg.cmd_vel.angular.z = 0
                
                 # programar pase
+                #llamar metodo depende del jugador
                 golero_msg.dribbler =False
                 golero_msg.kicker = 3
 

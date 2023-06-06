@@ -5,11 +5,12 @@ import math  # Importamos el módulo math para realizar operaciones matemáticas
 class Jugador:
     def __init__(self, posicion):
         self.posicion = posicion #En que posicion juega
-        self.ubicacion = {'x':0,'y':0} #lista donde se guardan los parametros de laubicación del jugador
+        self.ubicacion = {'x':0,'y':0} #diccionario donde se guardan los parametros de laubicación del jugador
         #self.ubicacion_y = 0
         self.orientacion = 0 #Angulo de orientacion
         self.publisher = None
         self.msg = SSL()
+        self.ref = {'pos_x':0,'pos_y':0,'posfrente_x':0,'posfrente_y':0}
 
     def get_ubicacion(self):
         return self.ubicacion  
@@ -30,12 +31,22 @@ class Jugador:
     def get_publiser(self):
         return self.publisher
     
+    def set_ref(self):
+        if self.posicion == 'golero':
+            self.ref = {'pos_x':-1500,'pos_y':0,'posfrente_x':2000,'posfrente_y':0}
+        return (self.ref)
+    
+    def set_posicion_distan(self):
+        distance_pos = (self.ref['pos_x'] - self.ubicacion['x'])**2 +( self.ref['pos_y'] - self.ubicacion['y']) **2
+        return distance_pos
+
+
 
     def mirar_frente(self, msg):
         self.msg = msg
-        self.msg.cmd_vel.linear.x = 0    
-        #goal_angle = math.atan2(posfrente_y- golero_y , posfrente_x- golero_x)
-        goal_angle = math.atan2(0 - self.ubicacion['y'], 2000 - self.ubicacion['x'])
+        refrefencia = self.set_ref()
+        self.msg.cmd_vel.linear.x = 0
+        goal_angle = math.atan2(refrefencia['posfrente_y'] - self.ubicacion['y'], refrefencia['posfrente_x'] - self.ubicacion['x'])
         heading_posfrente = goal_angle - self.orientacion
         heading_posfrente= math.atan2(math.sin(heading_posfrente), math.cos(heading_posfrente))
         #gira hasta mirar al frente
@@ -47,9 +58,12 @@ class Jugador:
         
         return(self.msg)
     
+    
     def ir_a_posicion(self,distance_pos,msg):
+        self.msg = msg
+        refrefencia = self.set_ref()
         # Si el jugador no está en su posición objetivo, moverse hacia allá
-        goal_angle = math.atan2(0- self.ubicacion['y'], -1500 - self.ubicacion['x'])
+        goal_angle = math.atan2(refrefencia['pos_y'] - self.ubicacion['y'], refrefencia['pos_x'] - self.ubicacion['x'])
         heading_pos = goal_angle - self.get_orientacion()
         heading_pos= math.atan2(math.sin(heading_pos), math.cos(heading_pos))
 
