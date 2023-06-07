@@ -19,7 +19,7 @@ atacante2 = Jugador('atacante2')
 def vision_callback(data):
     global ball, golero, defensa1, defensa2, atacante1, atacante2
     ball = data.balls  # Actualizamos la información del balón
-    print('ball  ', ball)
+    #print('ball  ', ball)
     # Recorremos la lista de robots azules detectados en el marco de detección
     if len(data.robots_blue) > 0:
         for robot in data.robots_blue:
@@ -57,19 +57,29 @@ if __name__ == "__main__":
             ball_x = ball[0].x  # Obtenemos la posición x del balón #pelota.get_ubicacion()['x']
             ball_y = ball[0].y  # Obtenemos la posición y del balón #pelota.get_ubicacion()['y']
             golero_x = golero.get_ubicacion()['x'] # Obtenemos la posición x del robot 0
-            golero_y = golero.get_ubicacion()['y']  # Obtenemos la posición y del robot 0
+            golero_y = golero.get_ubicacion()['y']  # golero
+            defensa1_x = defensa1.get_ubicacion()['x'] # Obtenemos la posición x del
+            defensa1_y = defensa1.get_ubicacion()['y'] # defensa1
+            defensa2_x = defensa2.get_ubicacion()['x'] # Obtenemos la posición x del
+            defensa2_y = defensa2.get_ubicacion()['y'] # defensa2
+            atacante1_x = atacante1.get_ubicacion()['x'] # Obtenemos la posición x del
+            atacante1_y = atacante1.get_ubicacion()['y'] # atacante1
+            atacante2_x = atacante2.get_ubicacion()['x'] # Obtenemos la posición x del
+            atacante2_y = atacante2.get_ubicacion()['y'] # atacante2            
         except:
             pass
 
         ######################################################################################
 #Golero
 
+        golero_msg.kicker = 0
+        golero_msg.dribbler =False
         #Calculamos la posicion de la pelota respeto al jugador
         # Primero la distancia de la pelota al jugador, ESTIMAMOS El CUADRADO DE LA DISTANCIA  
         distance_ball_cua= ((ball_x - golero_x)**2 + (ball_y - golero_y )**2)
        
        
-        if ball_x > -800 and distance_ball_cua> 2500:
+        if ball_x > -800 and distance_ball_cua> 250000:
             # Si la pelota esta lejos del golero y del arco el golero va a su posicion inicial
             # pos_x = -1500
             # pos_y = 0
@@ -95,7 +105,9 @@ if __name__ == "__main__":
                 #     golero_msg.cmd_vel.angular.z = heading_posfrente*5+0.5 if heading_posfrente > 0 else heading_posfrente*5-0.5
                                     
             else:
-                golero_msg = golero.ir_a_posicion(distance_pos,golero_msg)
+                golero_msg, orient = golero.ir_a_posicion(distance_pos,golero_msg)
+                golero.set_orientacion(orient)
+                #print('Orientacion 0',golero.get_orientacion())
                 # # Si el golero no está en su posición objetivo, moverse hacia allá
                 # goal_angle = math.atan2(pos_y- golero_y , pos_x- golero_x)
                 # heading_pos = goal_angle - golero.get_orientacion()
@@ -110,19 +122,67 @@ if __name__ == "__main__":
                 #     golero_msg.cmd_vel.angular.z = heading_pos*5+0.5 if heading_pos > 0 else heading_pos*5-0.5
 
         else:
+            print("entro al else")
 
             # Si la pelota esta cerca del golero o se acerca al arco seguir la pelota
-            if distance_ball_cua< 0.2:
+            distance_ball_cua= ((ball_x - golero_x)**2 + (ball_y - golero_y )**2)
+            if distance_ball_cua<12100:
                 # Si esta cerca detenerse
                 golero_msg.cmd_vel.linear.x = 0
                 golero_msg.cmd_vel.angular.z = 0
                
                 # programar pase
-                #llamar metodo depende del jugador
-                golero_msg.dribbler =False
-                golero_msg.kicker = 3
+                #time.sleep(1)
+                golero_msg.dribbler =True
+                print("agarro la pelota",  distance_ball_cua)
+
+                
+#######################################
+#Jugador cercano
+                jugadores_equipo = [defensa1, defensa2, atacante1, atacante2]
+                distancia_minima=16000000 
+                jugador_cercano=golero
+                for jugador in jugadores_equipo:
+                    if jugador is not golero:
+                        distancia = math.sqrt((jugador.get_ubicacion()['x'] - golero_x)**2 + (jugador.get_ubicacion()['y'] - golero_y)**2)
+                        if distancia < distancia_minima and jugador.get_ubicacion()['x'] >= golero.get_ubicacion()['x']:
+                            distancia_minima = distancia
+                            jugador_cercano = jugador
+
+                print("El jugador más cercano al golero con x  nayor es:", jugador_cercano.get_ubicacion()['x'] )
+                 
+                 #calculamos la direccion   
+                goal_angle = math.atan2(jugador_cercano.get_ubicacion()['y']- golero_y , jugador_cercano.get_ubicacion()['x']- golero_x)
+                #goal_angle = math.atan2(2000- golero_y , 0- golero_x)
+                heading_pase= goal_angle - golero.get_orientacion()
+                #print("orientacion golero", golero.get_orientacion() )
+            
+                heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
+                print("Pase del jugador angulo :", heading_pase)
+                #gira hasta mirar al jugador del pase
+                #while
+                if abs(heading_pase)<0.05:
+                    print("apunta al jugador")
+                    golero_msg.cmd_vel.linear.x = 0   
+                    golero_msg.cmd_vel.angular.z = 0
+                        #patear la pelota
+                    golero_msg.kicker = 3
+                    print("le pega a la pelota")
+                        
+                else:
+                    print("esta girando")
+                    golero_msg.cmd_vel.linear.x = 0 
+                    golero_msg.cmd_vel.angular.z =heading_pase+0.5 if heading_pase > 0 else heading_pase-0.5
+                    print(golero_msg.cmd_vel.angular.z )
+
+                #golero.publisher.publish(golero_msg)
+                #######################################
+                
 
             else:
+                #golero_msg.kicker = 0
+                #golero_msg.dribbler =True
+
 
                 goal_angle = math.atan2(ball_y - golero_y , ball_x - golero_x)
                 heading_ball = goal_angle - golero.get_orientacion()
@@ -146,5 +206,6 @@ if __name__ == "__main__":
 
 
         golero.publisher.publish(golero_msg)  # Publicamos el mensaje de comandos para el robot 0 azul
+        #print("salgo")
 
         r.sleep()
