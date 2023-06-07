@@ -174,36 +174,45 @@ if __name__ == "__main__":
             pos_x = -500
             pos_y = 1500
             dis_cerca=10000
-            distance_pos = (pos_x - defensaIzquierda_x)**2 +( pos_y - defensaIzquierda_y)**2
-            
+            #distance_pos = (pos_x - defensaIzquierda_x)**2 +( pos_y - defensaIzquierda_y)**2
+            distance_pos=defensaIzquierda.set_posicion_distan()
             if distance_pos< dis_cerca:
                 # Si el jugador está cerca de su posición objetivo, detenerse
-                defensaIzquierda_msg.cmd_vel.linear.x = 0
-                defensaIzquierda_msg.cmd_vel.angular.z = 0
-                 
+                #defensaIzquierda_msg.cmd_vel.linear.x = 0
+                #defensaIzquierda_msg.cmd_vel.angular.z = 0
+                defensaIzquierda_msg=defensaIzquierda.mirar_frente(defensaIzquierda_msg)
 
             else:
                 # Si el golero no está en su posición objetivo, moverse hacia allá
-                goal_angle = math.atan2(pos_y- defensaIzquierda_y, pos_x- defensaIzquierda_x)
-                heading_pos = goal_angle - defensaIzquierda.get_orientacion()
-                heading_pos= math.atan2(math.sin(heading_pos), math.cos(heading_pos))
+                # goal_angle = math.atan2(pos_y- defensaIzquierda_y, pos_x- defensaIzquierda_x)
+                # heading_pos = goal_angle - defensaIzquierda.get_orientacion()
+                # heading_pos= math.atan2(math.sin(heading_pos), math.cos(heading_pos))
 
-                if abs(heading_pos)<0.2:
-                   # si la idea de la programacion es la misma, controlar con otro rango la velocidad de los jugadores
-                   defensaIzquierda_msg.cmd_vel.linear.x = (distance_pos /2000000)+ 0.5#1.5
-                   defensaIzquierda_msg.cmd_vel.angular.z = 0
-                else:
-                    defensaIzquierda_msg.cmd_vel.linear.x = 0
-                    defensaIzquierda_msg.cmd_vel.angular.z = heading_pos*5+1 if heading_pos > 0 else heading_pos*5-1 #1.9 if heading_pos > 0 else -1.9
+                # if abs(heading_pos)<0.2:
+                #    # si la idea de la programacion es la misma, controlar con otro rango la velocidad de los jugadores
+                #    defensaIzquierda_msg.cmd_vel.linear.x = (distance_pos /2000000)+ 0.5#1.5
+                #    defensaIzquierda_msg.cmd_vel.angular.z = 0
+                # else:
+                #     defensaIzquierda_msg.cmd_vel.linear.x = 0
+                #     defensaIzquierda_msg.cmd_vel.angular.z = heading_pos*5+1 if heading_pos > 0 else heading_pos*5-1 #1.9 if heading_pos > 0 else -1.9
+                #golero_msg, orient = golero.ir_a_posicion(distance_pos,golero_msg) #vuelve a la pasicion
+                defensaIzquierda_msg, orient = defensaIzquierda.ir_a_posicion(distance_pos,defensaIzquierda_msg)
+                #golero.set_orientacion(orient)
+                defensaIzquierda.set_orientacion(orient)
 
+
+
+            #
         else:
 
             # Si la pelota esta cerca del defensa
             if distance_ball_cua2< 12100:
+                golero_msg = golero.agarra_pelota(golero_msg) 
+                defensaIzquierda_msg=defensaIzquierda.agarra_pelota(defensaIzquierda_msg)
                 # Si esta cerca detenerse
-                defensaIzquierda_msg.cmd_vel.linear.x = 0
-                defensaIzquierda_msg.cmd_vel.angular.z = 0
-                defensaIzquierda_msg.dribbler =True
+                #defensaIzquierda_msg.cmd_vel.linear.x = 0
+                #defensaIzquierda_msg.cmd_vel.angular.z = 0
+                #defensaIzquierda_msg.dribbler =True
                 #print("agarro la pelota",  distance_ball_cua)              
  ####################################               
                 # programar pase
@@ -229,34 +238,37 @@ if __name__ == "__main__":
                 #print("Pase del jugador angulo :", heading_pase)
                 #gira hasta mirar al jugador del pase
                 #while
-                if abs(heading_pase)<0.05:
-                    print("apunta al jugador")
-                    defensaIzquierda_msg.cmd_vel.linear.x = 0   
-                    defensaIzquierda_msg.cmd_vel.angular.z = 0
-                        #patear la pelota
-                    defensaIzquierda_msg.kicker = 3
-                    #print("le pega a la pelota")
+                defensaDerecho_msg=defensaIzquierda.pase_a_jugador(heading_pase, defensaIzquierda_msg)
+                # if abs(heading_pase)<0.05:
+                #     print("apunta al jugador")
+                #     defensaIzquierda_msg.cmd_vel.linear.x = 0   
+                #     defensaIzquierda_msg.cmd_vel.angular.z = 0
+                #         #patear la pelota
+                #     defensaIzquierda_msg.kicker = 3
+                #     #print("le pega a la pelota")
                         
-                else:
-                    print("esta girando")
-                    defensaIzquierda_msg.cmd_vel.linear.x = 0 
-                    defensaIzquierda_msg.cmd_vel.angular.z =heading_pase+0.5 if heading_pase > 0 else heading_pase-0.5
-                    #print(golero_msg.cmd_vel.angular.z )
+                # else:
+                #     print("esta girando")
+                #     defensaIzquierda_msg.cmd_vel.linear.x = 0 
+                #     defensaIzquierda_msg.cmd_vel.angular.z =heading_pase+0.5 if heading_pase > 0 else heading_pase-0.5
+                #     #print(golero_msg.cmd_vel.angular.z )
 
             else:
 
-                goal_angle = math.atan2(ball_y - defensaIzquierda_y, ball_x - defensaIzquierda_x)
-                heading_ball = goal_angle - defensaIzquierda.get_orientacion()
-                heading_ball = math.atan2(math.sin(heading_ball), math.cos(heading_ball))
+                # goal_angle = math.atan2(ball_y - defensaIzquierda_y, ball_x - defensaIzquierda_x)
+                # heading_ball = goal_angle - defensaIzquierda.get_orientacion()
+                # heading_ball = math.atan2(math.sin(heading_ball), math.cos(heading_ball))
         
-                if abs(heading_ball) < 0.2:
-                    # Si la orientación es correcta, avanzar hacia la pelota
-                    defensaIzquierda_msg.cmd_vel.linear.x = (distance_ball_cua2/2000000)+ 0.5#calculo de velocidad segun la distancia
-                    defensaIzquierda_msg.cmd_vel.angular.z = 0
-                else:
-                    # Si la orientación no es correcta, girar
-                    defensaIzquierda_msg.cmd_vel.linear.x = 0
-                    defensaIzquierda_msg.cmd_vel.angular.z = heading_ball*5+1 if heading_ball > 0 else heading_ball*5-1 
+                # if abs(heading_ball) < 0.2:
+                #     # Si la orientación es correcta, avanzar hacia la pelota
+                #     defensaIzquierda_msg.cmd_vel.linear.x = (distance_ball_cua2/2000000)+ 0.5#calculo de velocidad segun la distancia
+                #     defensaIzquierda_msg.cmd_vel.angular.z = 0
+                # else:
+                #     # Si la orientación no es correcta, girar
+                #     defensaIzquierda_msg.cmd_vel.linear.x = 0
+                #     defensaIzquierda_msg.cmd_vel.angular.z = heading_ball*5+1 if heading_ball > 0 else heading_ball*5-1 
+                golero_msg = golero.ir_a_pelota(ball_x,ball_y,distance_ball_cua,golero_msg)
+                defensaIzquierda_msg=defensaIzquierda.ir_a_pelota(ball_x,ball_y,distance_ball_cua,defensaIzquierda_msg) 
 
     
                                                                                                                             
