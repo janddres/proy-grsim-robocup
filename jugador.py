@@ -77,4 +77,51 @@ class Jugador:
             self.msg.cmd_vel.linear.x = 0
             self.msg.cmd_vel.angular.z = heading_pos*5+0.5 if heading_pos > 0 else heading_pos*5-0.5
 
-        return(self.msg, self.get_orientacion())    
+        return(self.msg, self.get_orientacion())
+
+
+    def agarra_pelota(self,msg):
+        self.msg = msg
+        # Si esta cerca detenerse
+        self.msg.cmd_vel.linear.x = 0
+        self.msg.cmd_vel.angular.z = 0
+        
+        # programar pase
+        #time.sleep(1)
+        self.msg.dribbler =True
+
+        return(self.msg)
+    
+    def pase_a_jugador(self,heading_pase,msg):
+        self.msg = msg
+        #gira hasta mirar al jugador del pase
+        if abs(heading_pase)<0.05:
+            print("apunta al jugador")
+            self.msg.cmd_vel.linear.x = 0   
+            self.msg.cmd_vel.angular.z = 0
+                #patear la pelota
+            self.msg.kicker = 3
+            print("le pega a la pelota")
+        else:
+            print("esta girando")
+            self.msg.cmd_vel.linear.x = 0 
+            self.msg.cmd_vel.angular.z =heading_pase+0.5 if heading_pase > 0 else heading_pase-0.5
+
+        return(self.msg)
+
+    def ir_a_pelota(self,ball_x,ball_y,distance_ball_cua,msg):
+        self.msg = msg
+        goal_angle = math.atan2(ball_y - self.ubicacion['y'], ball_x - self.ubicacion['x'])
+        heading_ball = goal_angle - self.get_orientacion()
+        heading_ball = math.atan2(math.sin(heading_ball), math.cos(heading_ball))
+
+        if abs(heading_ball) < 0.2:
+            # Si la orientación es correcta, avanzar hacia la pelota
+            self.msg.cmd_vel.linear.x = (distance_ball_cua/4000000)+ 0.5#calculo de velocidad segun la distancia
+            self.msg.cmd_vel.angular.z = 0
+        else:
+            # Si la orientación no es correcta, girar
+            self.msg.cmd_vel.linear.x = 0
+            self.msg.cmd_vel.angular.z = heading_ball*5+0.5 if heading_ball > 0 else heading_ball*5-0.5#control para que gire mas optimo 
+
+        return(self.msg)
