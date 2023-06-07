@@ -9,7 +9,6 @@ from jugador import Jugador
 from pelota import Pelota
 
 ball = SSL_DetectionBall()  # Creamos una instancia del mensaje SSL_DetectionBall
-#pelota = Pelota()
 golero = Jugador('golero')
 defensa1= Jugador('defensa1')
 defensa2 = Jugador('defensa2')
@@ -19,7 +18,6 @@ atacante2 = Jugador('atacante2')
 def vision_callback(data):
     global ball, golero, defensa1, defensa2, atacante1, atacante2
     ball = data.balls  # Actualizamos la información del balón
-    #print('ball  ', ball)
     # Recorremos la lista de robots azules detectados en el marco de detección
     if len(data.robots_blue) > 0:
         for robot in data.robots_blue:
@@ -38,7 +36,7 @@ def vision_callback(data):
             if robot.robot_id == 4:
                 atacante2.set_ubicacion(robot.pixel_x, robot.pixel_y)  # Actualizamos la información del robot 4
                 atacante2.set_orientacion(robot.orientation)
-        #pelota.set_ubicacion(data.balls[0].x, data.balls[0].y)
+
 if __name__ == "__main__":
     rospy.init_node("grsim_pria", anonymous=False)  # Inicializamos el nodo ROS con el nombre "grsim_pria"
     rospy.Subscriber("/vision", SSL_DetectionFrame, vision_callback)  # Nos suscribimos al tópico "/vision" para recibir los marcos de detección
@@ -78,7 +76,6 @@ if __name__ == "__main__":
         # Primero la distancia de la pelota al jugador, ESTIMAMOS El CUADRADO DE LA DISTANCIA  
         distance_ball_cua= ((ball_x - golero_x)**2 + (ball_y - golero_y )**2)
        
-       
         if ball_x > -800 and distance_ball_cua> 250000:
             # Si la pelota esta lejos del golero y del arco el golero va a su posicion inicial
             # pos_x = -1500
@@ -87,39 +84,15 @@ if __name__ == "__main__":
             # posfrente_y=0
             dis_cerca=10000
 
-            #distance_pos = (pos_x - golero_x)**2 +( pos_y - golero_y )**2
             distance_pos = golero.set_posicion_distan()
            
             if distance_pos< dis_cerca:
                 golero_msg = golero.mirar_frente(golero_msg)
-                # golero_msg.cmd_vel.linear.x = 0
-               
-                # goal_angle = math.atan2(posfrente_y- golero_y , posfrente_x- golero_x)
-                # heading_posfrente = goal_angle - golero.get_orientacion()
-                # heading_posfrente= math.atan2(math.sin(heading_posfrente), math.cos(heading_posfrente))
-                # #gira hasta mirar al frente
-                # if abs(heading_posfrente)<0.2:
-                #     golero_msg.cmd_vel.angular.z = 0
-                # else:
-                #     golero_msg.cmd_vel.linear.x = 0
-                #     golero_msg.cmd_vel.angular.z = heading_posfrente*5+0.5 if heading_posfrente > 0 else heading_posfrente*5-0.5
+  
                                     
             else:
                 golero_msg, orient = golero.ir_a_posicion(distance_pos,golero_msg)
                 golero.set_orientacion(orient)
-                #print('Orientacion 0',golero.get_orientacion())
-                # # Si el golero no está en su posición objetivo, moverse hacia allá
-                # goal_angle = math.atan2(pos_y- golero_y , pos_x- golero_x)
-                # heading_pos = goal_angle - golero.get_orientacion()
-                # heading_pos= math.atan2(math.sin(heading_pos), math.cos(heading_pos))
-
-                # if abs(heading_pos)<0.2:
-                #    # si la idea de la programacion es la misma, controlar con otro rango la velocidad de los jugadores
-                #    golero_msg.cmd_vel.linear.x = (distance_pos /2000000)+ 0.5#1.5
-                #    golero_msg.cmd_vel.angular.z = 0
-                # else:
-                #     golero_msg.cmd_vel.linear.x = 0
-                #     golero_msg.cmd_vel.angular.z = heading_pos*5+0.5 if heading_pos > 0 else heading_pos*5-0.5
 
         else:
             print("entro al else")
@@ -153,14 +126,11 @@ if __name__ == "__main__":
                  
                  #calculamos la direccion   
                 goal_angle = math.atan2(jugador_cercano.get_ubicacion()['y']- golero_y , jugador_cercano.get_ubicacion()['x']- golero_x)
-                #goal_angle = math.atan2(2000- golero_y , 0- golero_x)
                 heading_pase= goal_angle - golero.get_orientacion()
-                #print("orientacion golero", golero.get_orientacion() )
             
                 heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
                 print("Pase del jugador angulo :", heading_pase)
                 #gira hasta mirar al jugador del pase
-                #while
                 if abs(heading_pase)<0.05:
                     print("apunta al jugador")
                     golero_msg.cmd_vel.linear.x = 0   
@@ -206,6 +176,5 @@ if __name__ == "__main__":
 
 
         golero.publisher.publish(golero_msg)  # Publicamos el mensaje de comandos para el robot 0 azul
-        #print("salgo")
 
         r.sleep()
