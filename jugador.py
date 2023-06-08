@@ -68,7 +68,6 @@ class Jugador:
     def ir_a_posicion(self,distance_pos,msg):
         self.msg = msg
         refrefencia = self.set_ref()
-        # Si el jugador no está en su posición objetivo, moverse hacia allá
         goal_angle = math.atan2(refrefencia['pos_y'] - self.ubicacion['y'], refrefencia['pos_x'] - self.ubicacion['x'])
         heading_pos = goal_angle - self.get_orientacion()
         heading_pos= math.atan2(math.sin(heading_pos), math.cos(heading_pos))
@@ -85,7 +84,6 @@ class Jugador:
 
     def agarra_pelota(self,msg):
         self.msg = msg
-        # Si esta cerca detenerse
         self.msg.cmd_vel.linear.x = 0
         self.msg.cmd_vel.angular.z = 0
         self.msg.dribbler =True
