@@ -41,7 +41,7 @@ class Jugador:
         if self.posicion == 'atacante1':
             self.ref = {'pos_x':500,'pos_y':1000,'posfrente_x':2000,'posfrente_y':0}
         if self.posicion == 'atacante2':
-            self.ref = {'pos_x':500,'pos_y':1000,'posfrente_x':2000,'posfrente_y':0} 
+            self.ref = {'pos_x':500,'pos_y':-1000,'posfrente_x':2000,'posfrente_y':0} 
         return (self.ref)
     
     def set_posicion_distan(self):
