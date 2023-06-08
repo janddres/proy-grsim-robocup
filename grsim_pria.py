@@ -294,13 +294,15 @@ if __name__ == "__main__":
                 # Patea al arco
 
                 #calculamos la direccion   al arco
-                goal_angle = math.atan2(400- atacante1_y , 2000- atacante1_x)
+                # goal_angle = math.atan2(400- atacante1_y , 2000- atacante1_x)
         
-                heading_pase= goal_angle - atacante1.get_orientacion()
+                # heading_pase= goal_angle - atacante1.get_orientacion()
             
-                heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
+                # heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
 
-                atacante1_msg=atacante1.pase_a_jugador(heading_pase, atacante1_msg)
+                # atacante1_msg=atacante1.pase_a_jugador(heading_pase, atacante1_msg)
+
+                atacante1_msg = atacante1.pateo_al_arco(atacante1_msg)
 
             else:
 
@@ -340,13 +342,14 @@ if __name__ == "__main__":
                 # Patea al arco
 
                 #calculamos la direccion   al arco
-                goal_angle = math.atan2(400- atacante2_y , 2000- atacante2_x)
+                # goal_angle = math.atan2(400- atacante2_y , 2000- atacante2_x)
         
-                heading_pase= goal_angle - atacante2.get_orientacion()
+                # heading_pase= goal_angle - atacante2.get_orientacion()
             
-                heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
+                # heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
 
-                atacante2_msg=atacante2.pase_a_jugador(heading_pase, atacante2_msg)
+                # atacante2_msg=atacante2.pase_a_jugador(heading_pase, atacante2_msg)
+                atacante2_msg = atacante2.pateo_al_arco(atacante2_msg)
 
             else:
 

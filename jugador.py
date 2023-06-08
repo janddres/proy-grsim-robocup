@@ -1,6 +1,7 @@
 from geometry_msgs.msg import Twist  # Importamos el mensaje Twist para el control de movimiento
 from grsim_ros_bridge_msgs.msg import SSL  # Importamos el mensaje SSL para la comunicación con grSim
 import math  # Importamos el módulo math para realizar operaciones matemáticas
+import random
 
 class Jugador:
     def __init__(self, posicion):
@@ -139,3 +140,28 @@ class Jugador:
                     distancia_minima = distancia
                     jugador_cercano = player
         return(jugador_cercano)
+
+    def pateo_al_arco(self,msg):
+        self.msg = msg
+        disparo1 = math.atan2(400- self.ubicacion['y'] , 2000- self.ubicacion['x'])
+        disparo2 = math.atan2(-400- self.ubicacion['y'] , 2000- self.ubicacion['x'])
+        disparo3 = math.atan2(200- self.ubicacion['y'] , 2000- self.ubicacion['x'])
+        disparo4 = math.atan2(-200- self.ubicacion['y'] , 2000- self.ubicacion['x'])
+        disparos = [disparo1,disparo2,disparo3,disparo4]
+
+        goal_angle = random.choice(disparos)
+
+        heading_pase= goal_angle - self.get_orientacion()
+        heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
+
+        #gira hasta mirar al jugador del pase
+        if abs(heading_pase)<0.05:
+            self.msg.cmd_vel.linear.x = 0   
+            self.msg.cmd_vel.angular.z = 0
+                #patear la pelota
+            self.msg.kicker = 4
+        else:
+            self.msg.cmd_vel.linear.x = 0 
+            self.msg.cmd_vel.angular.z =heading_pase+0.5 if heading_pase > 0 else heading_pase-0.5
+
+        return(self.msg)
