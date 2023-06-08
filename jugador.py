@@ -35,7 +35,13 @@ class Jugador:
         if self.posicion == 'golero':
             self.ref = {'pos_x':-1500,'pos_y':0,'posfrente_x':2000,'posfrente_y':0}
         if self.posicion == 'defensaIzquierda':
-            self.ref = {'pos_x':-500,'pos_y':1500,'posfrente_x':2000,'posfrente_y':0}    
+            self.ref = {'pos_x':-500,'pos_y':1300,'posfrente_x':2000,'posfrente_y':0}  
+        if self.posicion == 'defensaDerecho':
+            self.ref = {'pos_x':-500,'pos_y':-1300,'posfrente_x':2000,'posfrente_y':0} 
+        if self.posicion == 'atacante1':
+            self.ref = {'pos_x':500,'pos_y':1000,'posfrente_x':2000,'posfrent_y':0}
+        if self.posicion == 'atacante2':
+            self.ref = {'pos_x':500,'pos_y':1000,'posfrente_x':2000,'posfrent_y':0} 
         return (self.ref)
     
     def set_posicion_distan(self):
@@ -50,6 +56,7 @@ class Jugador:
         self.msg.cmd_vel.linear.x = 0
         goal_angle = math.atan2(refrefencia['posfrente_y'] - self.ubicacion['y'], refrefencia['posfrente_x'] - self.ubicacion['x'])
         heading_posfrente = goal_angle - self.orientacion
+        #heading_posfrente = goal_angle - self.get_orientacion()
         heading_posfrente= math.atan2(math.sin(heading_posfrente), math.cos(heading_posfrente))
         #gira hasta mirar al frente
         if abs(heading_posfrente)<0.2:
