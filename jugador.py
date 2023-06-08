@@ -7,7 +7,6 @@ class Jugador:
     def __init__(self, posicion):
         self.posicion = posicion #En que posicion juega
         self.ubicacion = {'x':0,'y':0} #diccionario donde se guardan los parametros de laubicación del jugador
-        #self.ubicacion_y = 0
         self.orientacion = 0 #Angulo de orientacion
         self.publisher = None
         self.msg = SSL()
@@ -49,15 +48,12 @@ class Jugador:
         distance_pos = (self.ref['pos_x'] - self.ubicacion['x'])**2 +( self.ref['pos_y'] - self.ubicacion['y']) **2
         return distance_pos
 
-
-
     def mirar_frente(self, msg):
         self.msg = msg
         refrefencia = self.set_ref()
         self.msg.cmd_vel.linear.x = 0
         goal_angle = math.atan2(refrefencia['posfrente_y'] - self.ubicacion['y'], refrefencia['posfrente_x'] - self.ubicacion['x'])
         heading_posfrente = goal_angle - self.orientacion
-        #heading_posfrente = goal_angle - self.get_orientacion()
         heading_posfrente= math.atan2(math.sin(heading_posfrente), math.cos(heading_posfrente))
         #gira hasta mirar al frente
         if abs(heading_posfrente)<0.2:
@@ -78,7 +74,6 @@ class Jugador:
         heading_pos= math.atan2(math.sin(heading_pos), math.cos(heading_pos))
 
         if abs(heading_pos)<0.2:
-            # si la idea de la programacion es la misma, controlar con otro rango la velocidad de los jugadores
             self.msg.cmd_vel.linear.x = (distance_pos /2000000)+ 0.5#1.5
             self.msg.cmd_vel.angular.z = 0
         else:
@@ -93,9 +88,6 @@ class Jugador:
         # Si esta cerca detenerse
         self.msg.cmd_vel.linear.x = 0
         self.msg.cmd_vel.angular.z = 0
-        
-        # programar pase
-        #time.sleep(1)
         self.msg.dribbler =True
 
         return(self.msg)
@@ -106,7 +98,7 @@ class Jugador:
         if abs(heading_pase)<0.05:
             self.msg.cmd_vel.linear.x = 0   
             self.msg.cmd_vel.angular.z = 0
-                #patear la pelota
+            #patear la pelota
             self.msg.kicker = 3
         else:
             self.msg.cmd_vel.linear.x = 0 
@@ -154,11 +146,11 @@ class Jugador:
         heading_pase= goal_angle - self.get_orientacion()
         heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
 
-        #gira hasta mirar al jugador del pase
+        #gira hasta mirar el punto en el arco
         if abs(heading_pase)<0.05:
             self.msg.cmd_vel.linear.x = 0   
             self.msg.cmd_vel.angular.z = 0
-                #patear la pelota
+            #patear la pelota
             self.msg.kicker = 4
         else:
             self.msg.cmd_vel.linear.x = 0 
