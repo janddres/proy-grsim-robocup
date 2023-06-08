@@ -39,9 +39,9 @@ class Jugador:
         if self.posicion == 'defensaDerecho':
             self.ref = {'pos_x':-500,'pos_y':-1300,'posfrente_x':2000,'posfrente_y':0} 
         if self.posicion == 'atacante1':
-            self.ref = {'pos_x':500,'pos_y':1000,'posfrente_x':2000,'posfrente_y':0}
+            self.ref = {'pos_x':500,'pos_y':1000,'posfrente_x':2000,'posfrent_y':0}
         if self.posicion == 'atacante2':
-            self.ref = {'pos_x':500,'pos_y':1000,'posfrente_x':2000,'posfrente_y':0} 
+            self.ref = {'pos_x':500,'pos_y':1000,'posfrente_x':2000,'posfrent_y':0} 
         return (self.ref)
     
     def set_posicion_distan(self):
@@ -103,11 +103,14 @@ class Jugador:
         self.msg = msg
         #gira hasta mirar al jugador del pase
         if abs(heading_pase)<0.05:
+            print("apunta al jugador")
             self.msg.cmd_vel.linear.x = 0   
             self.msg.cmd_vel.angular.z = 0
                 #patear la pelota
             self.msg.kicker = 3
+            print("le pega a la pelota")
         else:
+            print("esta girando")
             self.msg.cmd_vel.linear.x = 0 
             self.msg.cmd_vel.angular.z =heading_pase+0.5 if heading_pase > 0 else heading_pase-0.5
 
@@ -129,13 +132,3 @@ class Jugador:
             self.msg.cmd_vel.angular.z = heading_ball*5+0.5 if heading_ball > 0 else heading_ball*5-0.5#control para que gire mas optimo 
 
         return(self.msg)
-    
-    def jugador_cercano(self,jugadores_equipo, rol):
-        distancia_minima=16000000 
-        for player in jugadores_equipo:
-            if player.posicion is not rol:
-                distancia = math.sqrt((player.get_ubicacion()['x'] - self.ubicacion['x'])**2 + (player.get_ubicacion()['y'] - self.ubicacion['y'])**2)
-                if distancia < distancia_minima and player.get_ubicacion()['x'] >= self.get_ubicacion()['x']:
-                    distancia_minima = distancia
-                    jugador_cercano = player
-        return(jugador_cercano)

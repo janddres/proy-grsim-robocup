@@ -5,7 +5,6 @@ from grsim_ros_bridge_msgs.msg import SSL  # Importamos el mensaje SSL para la c
 from krssg_ssl_msgs.msg import SSL_DetectionFrame, SSL_DetectionBall  # Importamos los mensajes relacionados con la detección de robots y balón
 import math  # Importamos el módulo math para realizar operaciones matemáticas
 from jugador import Jugador
-#from pelota import Pelota
 
 ball = SSL_DetectionBall()  # Creamos una instancia del mensaje SSL_DetectionBall
 golero = Jugador('golero')
@@ -70,7 +69,6 @@ if __name__ == "__main__":
     atacante1_msg = SSL()  # Creamos una instancia del mensaje SSL para enviar comandos al
     atacante2_msg = SSL()  # robot 4
     
-
     while not rospy.is_shutdown():
         try:
             ball_x = ball[0].x  # Obtenemos la posición x del balón #pelota.get_ubicacion()['x']
@@ -102,17 +100,12 @@ if __name__ == "__main__":
 ######################################################################################
 #Golero
 
-
-            
-        
         #Calculamos la posicion de la pelota respeto al jugador
         # Primero la distancia de la pelota al jugador, ESTIMAMOS El CUADRADO DE LA DISTANCIA  
         distance_ball_cua= ((ball_x - golero_x)**2 + (ball_y - golero_y )**2)
        
         if ball_x > -800 and distance_ball_cua> 250000:
             # Si la pelota esta lejos del golero y del arco el golero va a su posicion inicial
-
-            #dis_cerca=10000
 
             distance_pos = golero.set_posicion_distan()
            
@@ -133,19 +126,18 @@ if __name__ == "__main__":
                 
 #######################################
 #Jugador cercano
-                # jugadores_equipo = [defensaIzquierda, defensaDerecho, atacante1, atacante2]
-                distancia_minima=16000000 
-                #jugador_cercano=golero
-                for jugador in jugadores_equipo:
-                    if jugador is not golero:
-                        distancia = math.sqrt((jugador.get_ubicacion()['x'] - golero_x)**2 + (jugador.get_ubicacion()['y'] - golero_y)**2)
-                        if distancia < distancia_minima and jugador.get_ubicacion()['x'] >= golero.get_ubicacion()['x']:
-                            distancia_minima = distancia
-                            jugador_cercano = jugador
+                # distancia_minima=16000000 
+                # #jugador_cercano=golero
+                # for jugador in jugadores_equipo:
+                #     if jugador is not golero:
+                #         distancia = math.sqrt((jugador.get_ubicacion()['x'] - golero_x)**2 + (jugador.get_ubicacion()['y'] - golero_y)**2)
+                #         if distancia < distancia_minima and jugador.get_ubicacion()['x'] >= golero.get_ubicacion()['x']:
+                #             distancia_minima = distancia
+                #             jugador_cercano = jugador
 
                
-                 
-                 #calculamos la direccion   
+                jugador_cercano = golero.jugador_cercano(jugadores_equipo,golero.posicion)
+                #calculamos la direccion   
                 goal_angle = math.atan2(jugador_cercano.get_ubicacion()['y']- golero_y , jugador_cercano.get_ubicacion()['x']- golero_x)
                 heading_pase= goal_angle - golero.get_orientacion()
                 heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
@@ -154,24 +146,19 @@ if __name__ == "__main__":
                 #gira hasta mirar al jugador del pase
                 golero_msg = golero.pase_a_jugador(heading_pase,golero_msg)
                 
-
             else:
 
                 golero_msg = golero.ir_a_pelota(ball_x,ball_y,distance_ball_cua,golero_msg)  
 
  #########################################################################3 
-
 #Defensa Izquierdo      
-
 
         #Calculamos la posicion de la pelota respeto al jugador
         # Primero la distancia de la pelota al jugador, ESTIMAMOS El CUADRADO DE LA DISTANCIA   
         distance_ball_cua= ((ball_x - defensaIzquierda_x)**2 + (ball_y - defensaIzquierda_y)  **2)
         
-        
         if  distance_ball_cua> 250000 :
 
-            dis_cerca=10000
             #distance_pos = (pos_x - defensaIzquierda_x)**2 +( pos_y - defensaIzquierda_y)**2
             distance_pos=defensaIzquierda.set_posicion_distan()
             if distance_pos< dis_cerca:
@@ -183,10 +170,6 @@ if __name__ == "__main__":
                 defensaIzquierda_msg, orient = defensaIzquierda.ir_a_posicion(distance_pos,defensaIzquierda_msg)
               
                 defensaIzquierda.set_orientacion(orient)
-
-
-
-            #
         else:
 
             # Si la pelota esta cerca del defensa
@@ -197,48 +180,36 @@ if __name__ == "__main__":
  ####################################               
                 # programar pase
                 #jugadores_equipo = [ atacante1, atacante2]
-                distancia_minima=16000000 
-                jugador_cercano =    defensaIzquierda
-                for jugador in jugadores_equipo:
-                    if jugador is not defensaIzquierda:
-                        distancia = math.sqrt((jugador.get_ubicacion()['x'] - defensaIzquierda_x)**2 + (jugador.get_ubicacion()['y'] - defensaIzquierda_y)**2)
-                        if distancia < distancia_minima and jugador.get_ubicacion()['x'] >= defensaIzquierda.get_ubicacion()['x']:
-                            distancia_minima = distancia
-                            jugador_cercano = jugador
-
-                #print("El jugador más cercano al golero con x  nayor es:", jugador_cercano.get_ubicacion()['x'] )
+                # distancia_minima=16000000 
+                # jugador_cercano =    defensaIzquierda
+                # for jugador in jugadores_equipo:
+                #     if jugador is not defensaIzquierda:
+                #         distancia = math.sqrt((jugador.get_ubicacion()['x'] - defensaIzquierda_x)**2 + (jugador.get_ubicacion()['y'] - defensaIzquierda_y)**2)
+                #         if distancia < distancia_minima and jugador.get_ubicacion()['x'] >= defensaIzquierda.get_ubicacion()['x']:
+                #             distancia_minima = distancia
+                #             jugador_cercano = jugador
+                jugador_cercano = defensaIzquierda.jugador_cercano(jugadores_equipo,defensaIzquierda.posicion)
                  
-                 #calculamos la direccion   
+                #calculamos la direccion   
                 goal_angle = math.atan2(jugador_cercano.get_ubicacion()['y']- defensaIzquierda_y , jugador_cercano.get_ubicacion()['x']- defensaIzquierda_x)
 
                 heading_pase= goal_angle - defensaIzquierda.get_orientacion()
-                #print("orientacion golero", golero.get_orientacion() )
             
                 heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
 
                 defensaIzquierda_msg=defensaIzquierda.pase_a_jugador(heading_pase, defensaIzquierda_msg)
 
-
             else:
-
 
                 defensaIzquierda_msg=defensaIzquierda.ir_a_pelota(ball_x,ball_y,distance_ball_cua,defensaIzquierda_msg) 
 
-    
-                                                                                                                            
-                                                                                                                          
-       
  ##########################################################  
  #########################################################################3 
-
 #Defensa Derecho    
-
 
         #Calculamos la posicion de la pelota respeto al jugador
         # Primero la distancia de la pelota al jugador, ESTIMAMOS El CUADRADO DE LA DISTANCIA   
         distance_ball_cua= ((ball_x - defensaDerecho_x)**2 + (ball_y - defensaDerecho_y)  **2)
-        
-        
         
         if  distance_ball_cua> 250000 :
 
@@ -253,11 +224,8 @@ if __name__ == "__main__":
  
                 defensaDerecho_msg, orient = defensaDerecho.ir_a_posicion(distance_pos,defensaDerecho_msg)
  
-                defensaDerecho.set_orientacion(orient)
+                #defensaDerecho.set_orientacion(orient)
 
-
-
-            
         else:
 
             # Si la pelota esta cerca del defensa
@@ -268,16 +236,15 @@ if __name__ == "__main__":
  ####################################               
                 # programar pase
                 #jugadores_equipo = [ atacante1, atacante2]
-                distancia_minima=16000000 
-                jugador_cercano =    defensaDerecho
-                for jugador in jugadores_equipo:
-                    if jugador is not defensaDerecho:
-                        distancia = math.sqrt((jugador.get_ubicacion()['x'] - defensaDerecho_x)**2 + (jugador.get_ubicacion()['y'] - defensaDerecho_y)**2)
-                        if distancia < distancia_minima and jugador.get_ubicacion()['x'] >= defensaDerecho.get_ubicacion()['x']:
-                            distancia_minima = distancia
-                            jugador_cercano = jugador
-
-                #print("El jugador más cercano al golero con x  nayor es:", jugador_cercano.get_ubicacion()['x'] )
+                # distancia_minima=16000000 
+                # jugador_cercano =    defensaDerecho
+                # for jugador in jugadores_equipo:
+                #     if jugador is not defensaDerecho:
+                #         distancia = math.sqrt((jugador.get_ubicacion()['x'] - defensaDerecho_x)**2 + (jugador.get_ubicacion()['y'] - defensaDerecho_y)**2)
+                #         if distancia < distancia_minima and jugador.get_ubicacion()['x'] >= defensaDerecho.get_ubicacion()['x']:
+                #             distancia_minima = distancia
+                #             jugador_cercano = jugador
+                jugador_cercano = defensaDerecho.jugador_cercano(jugadores_equipo,defensaDerecho.posicion)
                  
                  #calculamos la direccion   
                 goal_angle = math.atan2(jugador_cercano.get_ubicacion()['y']- defensaDerecho_y , jugador_cercano.get_ubicacion()['x']- defensaDerecho_x)
@@ -289,29 +256,19 @@ if __name__ == "__main__":
 
                 defensaDerecho_msg=defensaDerecho.pase_a_jugador(heading_pase, defensaDerecho_msg)
 
-
             else:
-
 
                 defensaDerecho_msg=defensaDerecho.ir_a_pelota(ball_x,ball_y,distance_ball_cua,defensaDerecho_msg) 
 
-    
-                                                                                                                            
-                                                                                                                          
-       
+
  ##########################################################  
 ##########################################################  
  #########################################################################3 
-
 #Atacante1   
-
 
         #Calculamos la posicion de la pelota respeto al jugador
         # Primero la distancia de la pelota al jugador, ESTIMAMOS El CUADRADO DE LA DISTANCIA   
         distance_ball_cua= ((ball_x - atacante1_x)**2 + (ball_y - atacante1_y)  **2)
-        
-        
-        
         
         if  distance_ball_cua> 250000 :
 
@@ -319,9 +276,7 @@ if __name__ == "__main__":
             distance_pos=atacante1.set_posicion_distan()
             if distance_pos< dis_cerca:
 
-                
                 atacante1_msg=atacante1.mirar_frente(atacante1_msg)
-                
 
             else:
                 # Si el golero no está en su posición objetivo, moverse hacia allá
@@ -330,14 +285,10 @@ if __name__ == "__main__":
               
                 atacante1.set_orientacion(orient)
 
-
-
-            
         else:
 
             # Si la pelota esta cerca del defensa
             if distance_ball_cua< 12100:
-                
                 
                 atacante1_msg=atacante1.agarra_pelota(atacante1_msg)    
         
@@ -348,22 +299,15 @@ if __name__ == "__main__":
                 goal_angle = math.atan2(400- atacante1_y , 2000- atacante1_x)
         
                 heading_pase= goal_angle - atacante1.get_orientacion()
-
             
                 heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
 
                 atacante1_msg=atacante1.pase_a_jugador(heading_pase, atacante1_msg)
 
-
             else:
-
 
                 atacante1_msg=atacante1.ir_a_pelota(ball_x,ball_y,distance_ball_cua,atacante1_msg) 
 
-    
-                                                                                                                            
-                                                                                                                          
-       
  ##########################################################  
         golero.publisher.publish(golero_msg)  # Publicamos el mensaje de comandos para el robot 0 azul
         defensaIzquierda.publisher.publish(defensaIzquierda_msg) #Publicamos el m
