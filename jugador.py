@@ -42,7 +42,7 @@ class Jugador:
             self.ref = {'pos_x':500,'pos_y':1000,'posfrente_x':2000,'posfrente_y':0}
         if self.posicion == 'atacante2':
             self.ref = {'pos_x':500,'pos_y':-1000,'posfrente_x':2000,'posfrente_y':0} 
-        return (self.ref)
+        return self.ref
     
     def set_posicion_distan(self):
         distance_pos = (self.ref['pos_x'] - self.ubicacion['x'])**2 +( self.ref['pos_y'] - self.ubicacion['y']) **2
@@ -62,7 +62,7 @@ class Jugador:
             self.msg.cmd_vel.linear.x = 0
             self.msg.cmd_vel.angular.z = heading_posfrente*5+0.5 if heading_posfrente > 0 else heading_posfrente*5-0.5 
         
-        return(self.msg)
+        return self.msg
     
     
     def ir_a_posicion(self,distance_pos,msg):
@@ -73,7 +73,7 @@ class Jugador:
         heading_pos= math.atan2(math.sin(heading_pos), math.cos(heading_pos))
 
         if abs(heading_pos)<0.2:
-            self.msg.cmd_vel.linear.x = (distance_pos /2000000)+ 0.5#1.5
+            self.msg.cmd_vel.linear.x = (distance_pos /2000000)+ 0.5
             self.msg.cmd_vel.angular.z = 0
         else:
             self.msg.cmd_vel.linear.x = 0
@@ -86,9 +86,10 @@ class Jugador:
         self.msg = msg
         self.msg.cmd_vel.linear.x = 0
         self.msg.cmd_vel.angular.z = 0
+        self.msg.kicker = 0
         self.msg.dribbler =True
 
-        return(self.msg)
+        return self.msg
     
     def pase_a_jugador(self,heading_pase,msg):
         self.msg = msg
@@ -102,7 +103,7 @@ class Jugador:
             self.msg.cmd_vel.linear.x = 0 
             self.msg.cmd_vel.angular.z =heading_pase+0.5 if heading_pase > 0 else heading_pase-0.5
 
-        return(self.msg)
+        return self.msg
 
     def ir_a_pelota(self,ball_x,ball_y,distance_ball_cua,msg):
         self.msg = msg
@@ -119,28 +120,31 @@ class Jugador:
             self.msg.cmd_vel.linear.x = 0
             self.msg.cmd_vel.angular.z = heading_ball*5+0.5 if heading_ball > 0 else heading_ball*5-0.5#control para que gire mas optimo 
 
-        return(self.msg)
+        return self.msg
     
-    def jugador_cercano(self,jugadores_equipo, rol):
-        distancia_minima=16000000 
-        for player in jugadores_equipo:
-            if player.posicion is not rol:
-                distancia = math.sqrt((player.get_ubicacion()['x'] - self.ubicacion['x'])**2 + (player.get_ubicacion()['y'] - self.ubicacion['y'])**2)
-                if distancia < distancia_minima and player.get_ubicacion()['x'] >= self.get_ubicacion()['x']:
+    def jugador_cerca(self, jugadores_equipo, rol):
+        distancia_minima = float('inf')
+        jugador_cercano = None
+        mi_ubicacion = self.get_ubicacion()
+
+        for jugador in jugadores_equipo:
+            if jugador.posicion != rol:
+                ubicacion_jugador = jugador.get_ubicacion()
+                distancia = math.sqrt((ubicacion_jugador['x'] - mi_ubicacion['x'])**2 + (ubicacion_jugador['y'] - mi_ubicacion['y'])**2)
+                
+                if distancia < distancia_minima and ubicacion_jugador['x'] >= mi_ubicacion['x']:
                     distancia_minima = distancia
-                    jugador_cercano = player
-        return(jugador_cercano)
+                    jugador_cercano = jugador
+
+        return jugador_cercano
 
     def pateo_al_arco(self,msg):
         self.msg = msg
-        disparo1 = math.atan2(400- self.ubicacion['y'] , 2000- self.ubicacion['x'])
-        disparo2 = math.atan2(-400- self.ubicacion['y'] , 2000- self.ubicacion['x'])
-        disparo3 = math.atan2(200- self.ubicacion['y'] , 2000- self.ubicacion['x'])
-        disparo4 = math.atan2(-200- self.ubicacion['y'] , 2000- self.ubicacion['x'])
-        disparos = [disparo1,disparo2,disparo3,disparo4]
+        valores_x =[400,-400,200,-200]
+        y = 2000
+        x = random.choice(valores_x)
 
-        goal_angle = random.choice(disparos)
-
+        goal_angle  = math.atan2(x - self.ubicacion['y'] , y - self.ubicacion['x'])
         heading_pase= goal_angle - self.get_orientacion()
         heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
 
@@ -154,4 +158,4 @@ class Jugador:
             self.msg.cmd_vel.linear.x = 0 
             self.msg.cmd_vel.angular.z =heading_pase+0.5 if heading_pase > 0 else heading_pase-0.5
 
-        return(self.msg)
+        return self.msg

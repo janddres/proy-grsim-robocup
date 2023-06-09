@@ -43,7 +43,6 @@ if __name__ == "__main__":
     defensaDerecho.publisher= rospy.Publisher("/robot_blue_2/cmd", SSL, queue_size=10)
     atacante1.publisher= rospy.Publisher("/robot_blue_3/cmd", SSL, queue_size=10)
     atacante2.publisher= rospy.Publisher("/robot_blue_4/cmd", SSL, queue_size=10)
-    
 
     r = rospy.Rate(1000)  # Establecemos la frecuencia de publicación en 1000 Hz
 
@@ -106,35 +105,24 @@ if __name__ == "__main__":
        
         if ball_x > -800 and distance_ball_cua> 250000:
             # Si la pelota esta lejos del golero y del arco el golero va a su posicion inicial
-
             distance_pos = golero.set_posicion_distan()
-           
             if distance_pos< dis_cerca:
                 golero_msg = golero.mirar_frente(golero_msg) #se posiciona al frente
-                 
             else:
                 golero_msg, orient = golero.ir_a_posicion(distance_pos,golero_msg) #vuelve a la psicion inicial
                 golero.set_orientacion(orient)
-
         else:
-            print("entro al else")
             # Si la pelota esta cerca del golero o se acerca al arco seguir la pelota
             if distance_ball_cua<12100:
                 golero_msg = golero.agarra_pelota(golero_msg) #retiene la pelota
-
-               
-                jugador_cercano = golero.jugador_cercano(jugadores_equipo,golero.posicion)
+                jugador_cercano = golero.jugador_cerca(jugadores_equipo,golero.posicion)
                 #calculamos la direccion   
                 goal_angle = math.atan2(jugador_cercano.get_ubicacion()['y']- golero_y , jugador_cercano.get_ubicacion()['x']- golero_x)
                 heading_pase= goal_angle - golero.get_orientacion()
                 heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
-     
-
                 #gira hasta mirar al jugador del pase
                 golero_msg = golero.pase_a_jugador(heading_pase,golero_msg)
-                
             else:
-
                 golero_msg = golero.ir_a_pelota(ball_x,ball_y,distance_ball_cua,golero_msg) #va a la pelota 
 
  #########################################################################3 
@@ -144,37 +132,23 @@ if __name__ == "__main__":
         distance_ball_cua= ((ball_x - defensaIzquierda_x)**2 + (ball_y - defensaIzquierda_y)  **2)
         
         if  distance_ball_cua> 250000 :
-
             distance_pos=defensaIzquierda.set_posicion_distan()
             if distance_pos< dis_cerca:
-
                 defensaIzquierda_msg=defensaIzquierda.mirar_frente(defensaIzquierda_msg)
-
             else:
-          
                 defensaIzquierda_msg, orient = defensaIzquierda.ir_a_posicion(distance_pos,defensaIzquierda_msg)
-              
                 defensaIzquierda.set_orientacion(orient)
         else:
-
             # Si la pelota esta cerca del defensa
             if distance_ball_cua< 12100:
-
                 defensaIzquierda_msg=defensaIzquierda.agarra_pelota(defensaIzquierda_msg)
-
-                jugador_cercano = defensaIzquierda.jugador_cercano(jugadores_equipo,defensaIzquierda.posicion)
-                 
+                jugador_cercano = defensaIzquierda.jugador_cerca(jugadores_equipo,defensaIzquierda.posicion)
                 #calculamos la direccion   
                 goal_angle = math.atan2(jugador_cercano.get_ubicacion()['y']- defensaIzquierda_y , jugador_cercano.get_ubicacion()['x']- defensaIzquierda_x)
-
                 heading_pase= goal_angle - defensaIzquierda.get_orientacion()
-            
                 heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
-
                 defensaIzquierda_msg=defensaIzquierda.pase_a_jugador(heading_pase, defensaIzquierda_msg)
-
             else:
-
                 defensaIzquierda_msg=defensaIzquierda.ir_a_pelota(ball_x,ball_y,distance_ball_cua,defensaIzquierda_msg) 
 
 #########################################################################3 
@@ -184,117 +158,72 @@ if __name__ == "__main__":
         distance_ball_cua= ((ball_x - defensaDerecho_x)**2 + (ball_y - defensaDerecho_y)  **2)
         
         if  distance_ball_cua> 250000 :
-
             distance_pos=defensaDerecho.set_posicion_distan()
             if distance_pos< dis_cerca:
-
                 defensaDerecho_msg=defensaDerecho.mirar_frente(defensaDerecho_msg)
-
             else:
-                # Si el golero no está en su posición objetivo, moverse hacia allá
- 
+                # Si el jugador no está en su posición objetivo, moverse hacia allá
                 defensaDerecho_msg, orient = defensaDerecho.ir_a_posicion(distance_pos,defensaDerecho_msg)
- 
-
         else:
-
             # Si la pelota esta cerca del defensa
             if distance_ball_cua< 12100:
-                
                 defensaDerecho_msg=defensaDerecho.agarra_pelota(defensaDerecho_msg)
-        
-                jugador_cercano = defensaDerecho.jugador_cercano(jugadores_equipo,defensaDerecho.posicion)
-                 
+                jugador_cercano = defensaDerecho.jugador_cerca(jugadores_equipo,defensaDerecho.posicion)
                  #calculamos la direccion   
                 goal_angle = math.atan2(jugador_cercano.get_ubicacion()['y']- defensaDerecho_y , jugador_cercano.get_ubicacion()['x']- defensaDerecho_x)
-        
                 heading_pase= goal_angle - defensaDerecho.get_orientacion()
-
-            
                 heading_pase= math.atan2(math.sin(heading_pase), math.cos(heading_pase))
-
                 defensaDerecho_msg=defensaDerecho.pase_a_jugador(heading_pase, defensaDerecho_msg)
-
             else:
-
                 defensaDerecho_msg=defensaDerecho.ir_a_pelota(ball_x,ball_y,distance_ball_cua,defensaDerecho_msg) 
-
-
 
 #########################################################################3
 #Atacante1   
 
         #Calculamos la posicion de la pelota respeto al jugador 
         distance_ball_cua= ((ball_x - atacante1_x)**2 + (ball_y - atacante1_y)  **2)
-        
         if  distance_ball_cua> 250000 :
-
             distance_pos=atacante1.set_posicion_distan()
             if distance_pos< dis_cerca:
-
                 atacante1_msg=atacante1.mirar_frente(atacante1_msg)
-
             else:
                 # Si el jugador no está en su posición objetivo, moverse hacia allá
- 
                 atacante1_msg, orient = atacante1.ir_a_posicion(distance_pos,atacante1_msg)
-              
                 atacante1.set_orientacion(orient)
-
         else:
-
             # Si la pelota esta cerca del atacante
             if distance_ball_cua< 12100:
-                
                 atacante1_msg=atacante1.agarra_pelota(atacante1_msg)    
-        
-
                 atacante1_msg = atacante1.pateo_al_arco(atacante1_msg)
-
             else:
-
                 atacante1_msg=atacante1.ir_a_pelota(ball_x,ball_y,distance_ball_cua,atacante1_msg)
-
 
 #########################################################################3
 #Atacante2  
 
         #Calculamos la posicion de la pelota respeto al jugador
-  
         distance_ball_cua= ((ball_x - atacante2_x)**2 + (ball_y - atacante2_y)  **2)
-        
         if  distance_ball_cua> 250000 :
-
             distance_pos=atacante2.set_posicion_distan()
             if distance_pos< dis_cerca:
-
                 atacante2_msg=atacante2.mirar_frente(atacante2_msg)
-
             else:
- 
                 atacante2_msg, orient = atacante2.ir_a_posicion(distance_pos,atacante2_msg)
-              
                 atacante2.set_orientacion(orient)
-
         else:
-
             # Si la pelota esta cerca
             if distance_ball_cua< 12100:
-                
                 atacante2_msg=atacante2.agarra_pelota(atacante2_msg)    
-        
-
                 atacante2_msg = atacante2.pateo_al_arco(atacante2_msg)
-
             else:
-
                 atacante2_msg=atacante2.ir_a_pelota(ball_x,ball_y,distance_ball_cua,atacante2_msg)                 
 
- ##########################################################  
-        golero.publisher.publish(golero_msg)  # Publicamos el mensaje de comandos para el robot 0 azul
-        defensaIzquierda.publisher.publish(defensaIzquierda_msg) #Publicamos el m
-        defensaDerecho.publisher.publish(defensaDerecho_msg) #mensaje de comandos para
-        atacante1.publisher.publish(atacante1_msg) #jugador 1 aportado a la batalha
-        atacante2.publisher.publish(atacante2_msg) #jugador 2 aportado a la batalha
+ ##########################################################
+        # Publicamos los mensajes de acciones para los robots
+        golero.publisher.publish(golero_msg)
+        defensaIzquierda.publisher.publish(defensaIzquierda_msg) 
+        defensaDerecho.publisher.publish(defensaDerecho_msg)
+        atacante1.publisher.publish(atacante1_msg) 
+        atacante2.publisher.publish(atacante2_msg) 
 
         r.sleep()
